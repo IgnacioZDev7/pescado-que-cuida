@@ -185,17 +185,25 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 ```ts
 type Perfil = 'embarazada' | 'nino' | 'adulto';
 type Color = 'verde' | 'amarillo' | 'rojo' | 'sin_datos';
+type Base = 'humedo' | 'seco' | 'por_confirmar';
+type HgTipo = 'total' | 'metilmercurio';
 
 interface Especie { id: string; rio: string; nombreComun: string; nombreCientifico?: string;
   nombresLocales: Record<string, string>; hgUgG: number | null; hgMenorQue?: number;
-  base: 'humedo' | 'seco' | 'por_confirmar'; fuente: string; anio: number; foto: string; }
+  hgTipo: HgTipo; base: Base; nMuestras?: number; tamanoCm?: string;
+  fuente: string; anio: number; foto: string; validadoPor?: string; nota?: string; }
 
 interface Resultado { color: Color; mensajeClave: string;   // id de frase con audio
   reemplazos: string[];                                       // ids de especies verdes del mismo río
   fuente: string; advertencia?: string; }
 
-// Dominio: función pura y testeada
-function reglaRiesgo(e: Especie, p: Perfil, c: Config): Resultado;
+interface Config { version_datos: string; referencia: string; porcion_g: number;
+  cortes_ug_g: { verde_max: number; amarillo_max: number }; perfiles: Perfil[];
+  umbral_confianza_vision: number; nota?: string; }
+
+// Dominio: función pura y testeada.
+// El catálogo se recibe como parámetro para calcular los reemplazos en forma pura.
+function reglaRiesgo(e: Especie | undefined, p: Perfil, c: Config, catalogo?: Especie[]): Resultado;
 
 // ML: nunca devuelve color
 interface Prediccion { especieId: string | 'otro'; confianza: number; }
