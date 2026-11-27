@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background-color: #fffdf8;
+  color: #1a1a1a;
+}
+
+/* Foco siempre visible para quien navega con teclado o lector de pantalla. */
+:focus-visible {
+  outline: 3px solid #123b5c;
+  outline-offset: 2px;
+}

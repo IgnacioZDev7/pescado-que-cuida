@@ -1,12 +1,15 @@
 // Catálogo de datos empaquetado en la app. Los JSON se generan con `npm run build-data`
-// a partir de data/especies.csv y data/config.json (no se editan a mano).
-import type { Config, Especie } from '../domain/tipos';
+// a partir de data/especies.csv, data/frases.csv y data/config.json (no se editan a mano).
+import type { Config, Especie, Frase } from '../domain/tipos';
 import configGenerada from './generado/config.json';
 import especiesGeneradas from './generado/especies.json';
+import frasesGeneradas from './generado/frases.json';
 
 export const especies: Especie[] = especiesGeneradas as Especie[];
 
 export const config: Config = configGenerada as Config;
+
+export const frases: Frase[] = frasesGeneradas as Frase[];
 
 /** Ríos con al menos una especie, sin repetir y en el orden del CSV. */
 export const rios: string[] = [...new Set(especies.map((e) => e.rio))];

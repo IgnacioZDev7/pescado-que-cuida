@@ -1,4 +1,4 @@
-// Convierte data/especies.csv y data/config.json en JSON validado para la app.
+// Convierte data/especies.csv, data/frases.csv y data/config.json en JSON validado para la app.
 // Uso (desde app/): npm run build-data
 // La variable de entorno ESPECIES_CSV permite validar otra copia del CSV.
 
@@ -8,6 +8,7 @@ import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type PapaTipos from 'papaparse';
 import { validarEspecies } from '../app/src/domain/validarEspecies.ts';
+import { validarFrases } from '../app/src/domain/validarFrases.ts';
 
 const dirScript = dirname(fileURLToPath(import.meta.url));
 const raiz = resolve(dirScript, '..');
@@ -19,6 +20,7 @@ const Papa = requerirDesdeApp('papaparse') as typeof PapaTipos;
 
 const rutaCsv = process.env.ESPECIES_CSV ? resolve(process.env.ESPECIES_CSV) : resolve(raiz, 'data/especies.csv');
 const rutaConfig = resolve(raiz, 'data/config.json');
+const rutaFrases = resolve(raiz, 'data/frases.csv');
 const dirSalida = resolve(dirApp, 'src/data/generado');
 const nombreCsv = basename(rutaCsv);
 
@@ -43,11 +45,17 @@ function validarConfig(config: unknown): string[] {
 }
 
 let textoCsv: string;
+let textoFrases: string;
 let config: unknown;
 try {
   textoCsv = readFileSync(rutaCsv, 'utf8');
 } catch {
   fallar([`No se pudo leer ${rutaCsv}`]);
+}
+try {
+  textoFrases = readFileSync(rutaFrases, 'utf8');
+} catch {
+  fallar([`No se pudo leer ${rutaFrases}`]);
 }
 try {
   config = JSON.parse(readFileSync(rutaConfig, 'utf8'));
@@ -60,9 +68,16 @@ const erroresParseo = parseo.errors.map(
   (e) => `${nombreCsv} fila ${typeof e.row === 'number' ? e.row + 2 : '?'}: ${e.message}`,
 );
 const { especies, errores } = validarEspecies(parseo.data);
+const parseoFrases = Papa.parse<Record<string, string>>(textoFrases, { header: true, skipEmptyLines: true });
+const erroresParseoFrases = parseoFrases.errors.map(
+  (e) => `frases.csv fila ${typeof e.row === 'number' ? e.row + 2 : '?'}: ${e.message}`,
+);
+const { frases, errores: erroresFrases } = validarFrases(parseoFrases.data);
 const mensajes = [
   ...erroresParseo,
   ...errores.map((e) => `${nombreCsv} fila ${e.fila}: ${e.mensaje}`),
+  ...erroresParseoFrases,
+  ...erroresFrases.map((e) => `frases.csv fila ${e.fila}: ${e.mensaje}`),
   ...validarConfig(config),
 ];
 
@@ -70,9 +85,10 @@ if (mensajes.length > 0) fallar(mensajes);
 
 mkdirSync(dirSalida, { recursive: true });
 writeFileSync(resolve(dirSalida, 'especies.json'), JSON.stringify(especies, null, 2) + '\n');
+writeFileSync(resolve(dirSalida, 'frases.json'), JSON.stringify(frases, null, 2) + '\n');
 writeFileSync(resolve(dirSalida, 'config.json'), JSON.stringify(config, null, 2) + '\n');
 
 const rios = [...new Set(especies.map((e) => e.rio))];
 console.log(
-  `${especies.length} especies validadas (ríos: ${rios.join(', ')}) desde ${nombreCsv}; datos escritos en app/src/data/generado/`,
+  `${especies.length} especies validadas (ríos: ${rios.join(', ')}) desde ${nombreCsv}, ${frases.length} frases; datos escritos en app/src/data/generado/`,
 );
