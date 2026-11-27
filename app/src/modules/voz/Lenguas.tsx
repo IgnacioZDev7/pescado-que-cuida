@@ -40,9 +40,22 @@ function TarjetaFrase({
         {frase.pictograma && <Pictograma ruta={frase.pictograma} />}
         <div className="flex flex-col gap-1">
           <p className="text-xl font-bold text-gray-950">{frase.es}</p>
+          {frase.textoLengua && (
+            <p lang="ese" className="text-2xl font-bold text-marino">
+              {frase.textoLengua}
+            </p>
+          )}
           <p className="text-base text-gray-800">
             {frase.lengua ? (NOMBRE_LENGUA[frase.lengua] ?? frase.lengua) : 'Pendiente de grabación'}
           </p>
+          {frase.textoLengua && frase.fuenteTraduccion && (
+            <p className="text-sm text-gray-700">Fuente: {frase.fuenteTraduccion}</p>
+          )}
+          {frase.textoLengua && !frase.validadoPor && (
+            <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2 py-0.5 text-sm font-semibold text-gray-950">
+              Texto por validar con hablante nativo
+            </span>
+          )}
           {!frase.validadoPor && (
             <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2 py-0.5 text-sm font-semibold text-gray-950">
               Audio de prueba

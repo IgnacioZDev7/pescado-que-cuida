@@ -43,6 +43,10 @@ export function validarFrases(filas: Record<string, string>[]): ResultadoValidac
     if (archivoAudio !== '') frase.archivoAudio = archivoAudio;
     if (pictograma !== '') frase.pictograma = pictograma;
     if (validadoPor !== '') frase.validadoPor = validadoPor;
+    const textoLengua = campo('texto_lengua');
+    const fuenteTraduccion = campo('fuente_traduccion');
+    if (textoLengua !== '') frase.textoLengua = textoLengua;
+    if (fuenteTraduccion !== '') frase.fuenteTraduccion = fuenteTraduccion;
     frases.push(frase);
   });
 
