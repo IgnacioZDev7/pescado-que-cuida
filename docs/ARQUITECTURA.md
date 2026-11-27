@@ -165,6 +165,7 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 | anio | entero | `2026` | Sí |
 | foto | archivo | `pacu.webp` | Sí |
 | validado_por | texto | | No |
+| nota | texto | `media; base por confirmar` | No |
 
 `build-data.ts` **rechaza** filas sin fuente o sin base, para que no entre un dato sin respaldo.
 
@@ -184,17 +185,25 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 ```ts
 type Perfil = 'embarazada' | 'nino' | 'adulto';
 type Color = 'verde' | 'amarillo' | 'rojo' | 'sin_datos';
+type Base = 'humedo' | 'seco' | 'por_confirmar';
+type HgTipo = 'total' | 'metilmercurio';
 
 interface Especie { id: string; rio: string; nombreComun: string; nombreCientifico?: string;
   nombresLocales: Record<string, string>; hgUgG: number | null; hgMenorQue?: number;
-  base: 'humedo' | 'seco' | 'por_confirmar'; fuente: string; anio: number; foto: string; }
+  hgTipo: HgTipo; base: Base; nMuestras?: number; tamanoCm?: string;
+  fuente: string; anio: number; foto: string; validadoPor?: string; nota?: string; }
 
 interface Resultado { color: Color; mensajeClave: string;   // id de frase con audio
   reemplazos: string[];                                       // ids de especies verdes del mismo río
   fuente: string; advertencia?: string; }
 
-// Dominio: función pura y testeada
-function reglaRiesgo(e: Especie, p: Perfil, c: Config): Resultado;
+interface Config { version_datos: string; referencia: string; porcion_g: number;
+  cortes_ug_g: { verde_max: number; amarillo_max: number }; perfiles: Perfil[];
+  umbral_confianza_vision: number; nota?: string; }
+
+// Dominio: función pura y testeada.
+// El catálogo se recibe como parámetro para calcular los reemplazos en forma pura.
+function reglaRiesgo(e: Especie | undefined, p: Perfil, c: Config, catalogo?: Especie[]): Resultado;
 
 // ML: nunca devuelve color
 interface Prediccion { especieId: string | 'otro'; confianza: number; }
@@ -202,12 +211,21 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
 ```
 
 ### 5.4 Reglas de riesgo (validar con la estudiante de BYF antes de programar)
-- `hg ≤ verde_max` → verde; `≤ amarillo_max` → amarillo; mayor → rojo.
-- Valor `<0.5` sin número exacto → **amarillo** (prudente) hasta tener el dato.
-- `base = por_confirmar` → se muestra con advertencia "dato por confirmar".
-- Perfil embarazada o niño con color rojo → mensaje "mejor cambiarlo" + reemplazos verdes del mismo río.
+- **El color depende solo de la especie**: es el mismo para todos los perfiles. El perfil cambia el mensaje y los reemplazos, no el color.
+- Cortes inclusivos: `hg ≤ verde_max` → verde; `hg ≤ amarillo_max` → amarillo; mayor → rojo.
+- Valor `<X` sin número exacto → se usa el color de X (peor caso): `<0.1` → verde, `<0.5` → amarillo, `<1.0` → rojo.
+- Mensaje (`mensajeClave`) según color y perfil:
+
+  | Color | Embarazada o lactancia | Niño | Adulto |
+  |---|---|---|---|
+  | Rojo | `evitar_cambiar` ("mejor cambiarlo") | `evitar_cambiar` | `con_moderacion` |
+  | Amarillo | `con_moderacion` | `con_moderacion` | `elegir_primero` |
+  | Verde | `elegir_primero` | `elegir_primero` | `elegir_primero` |
+
+- Reemplazos: especies del **mismo río**, distintas de la elegida, cuyo color sea verde. Se muestran en todo resultado rojo (cualquier perfil) y en amarillo para embarazada o niño. En los demás casos no hay reemplazos.
+- `base = por_confirmar` → se muestra con la advertencia "Dato por confirmar".
 - **No se muestran porciones numéricas** hasta que haya un cálculo validado por la autoridad sanitaria. Solo se muestran mensajes de frecuencia ("elegir primero", "con moderación", "mejor cambiarlo").
-- Sin datos de la especie → `sin_datos`: "No tenemos análisis de este pez en su río".
+- Sin datos de la especie (especie desconocida o sin valor de mercurio) → `sin_datos`, **nunca verde**: "No tenemos análisis de este pez en su río".
 
 ---
 

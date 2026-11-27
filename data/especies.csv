@@ -1,7 +1,7 @@
-rio,especie_comun,nombre_cientifico,nombre_local,hg_total_ug_g,base,n,fuente,anio,nota
-Beni,Pez ciego,,,2.7,por confirmar,,Peñates-Hernández et al. (en Llamamiento 2026),2026,media; base humeda/seca por confirmar
-Beni,Bagre,,,1.7,por confirmar,,Peñates-Hernández et al. (en Llamamiento 2026),2026,media; base por confirmar
-Beni,Sábalo,,,0.1,por confirmar,,Peñates-Hernández et al. (en Llamamiento 2026),2026,media
-Beni,Pacú,Piaractus brachypomus,,0.1,por confirmar,,Peñates-Hernández et al. (en Llamamiento 2026),2026,Loayza 2026 reporta <0.5 ppm peso humedo
-Beni,Blanquillo / zamurito,Calophysus macropterus,,1.9,peso humedo,,Loayza et al. J Food Comp Anal 2026,2026,1.9 ± 1.0 ppm; mayor media de 10 especies
-Beni,Paiche,Arapaima gigas,,<0.5,peso humedo,,Loayza et al. J Food Comp Anal 2026,2026,bajo Hg; perfil EPA/DHA favorable
+id,rio,nombre_comun,nombre_cientifico,nombre_local_ese_ejja,nombre_local_tacana,nombre_local_tsimane,hg_ug_g,hg_tipo,base,n_muestras,tamano_cm,fuente,anio,foto,validado_por,nota
+pez-ciego,Beni,Pez ciego,,,,,2.7,total,por_confirmar,,,Peñates-Hernández et al. (en Llamamiento 2026),2026,pez-ciego.webp,,media; base humeda/seca por confirmar
+bagre,Beni,Bagre,,,,,1.7,total,por_confirmar,,,Peñates-Hernández et al. (en Llamamiento 2026),2026,bagre.webp,,media; base por confirmar
+sabalo,Beni,Sábalo,,,,,0.1,total,por_confirmar,,,Peñates-Hernández et al. (en Llamamiento 2026),2026,sabalo.webp,,media
+pacu,Beni,Pacú,Piaractus brachypomus,,,,0.1,total,por_confirmar,,,Peñates-Hernández et al. (en Llamamiento 2026),2026,pacu.webp,,Loayza 2026 reporta <0.5 ppm peso humedo
+blanquillo,Beni,Blanquillo / zamurito,Calophysus macropterus,,,,1.9,total,humedo,,,Loayza et al. J Food Comp Anal 2026,2026,blanquillo.webp,,1.9 ± 1.0 ppm; mayor media de 10 especies
+paiche,Beni,Paiche,Arapaima gigas,,,,<0.5,total,humedo,,,Loayza et al. J Food Comp Anal 2026,2026,paiche.webp,,bajo Hg; perfil EPA/DHA favorable
