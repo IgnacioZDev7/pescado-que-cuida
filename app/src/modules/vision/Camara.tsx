@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buscarEspecie, config, especiesDelRio, rios } from '../../data/catalogo';
 import { decidirVision } from '../../domain/decidirVision';
+import { calcularRecorte, type Tamano } from '../../domain/recorte';
 import type { Especie, Prediccion } from '../../domain/tipos';
 import { cargarModelo, clasificar } from '../../ml/clasificador';
 import { BotonGrande } from '../../ui/BotonGrande';
@@ -19,8 +20,27 @@ type Etapa =
   | { tipo: 'manual' }
   | { tipo: 'perfil' };
 
+/** Fracción del ancho de la vista que ocupa el recuadro guía (debe coincidir con w-3/4). */
+const FRACCION_RECUADRO = 0.75;
+/** Lado máximo de la foto recortada; el clasificador la reduce a 224 px de todos modos. */
+const LADO_MAXIMO_SALIDA = 512;
+
 function detener(stream: MediaStream | null) {
   stream?.getTracks().forEach((pista) => pista.stop());
+}
+
+/** Dibuja en el canvas, cuadrado, solo la zona de la fuente que cae dentro del recuadro guía. */
+function dibujarRecorte(canvas: HTMLCanvasElement, imagen: CanvasImageSource, fuente: Tamano, vista: Tamano) {
+  const recorte = calcularRecorte(fuente, vista, FRACCION_RECUADRO);
+  const lado = Math.max(1, Math.min(Math.round(recorte.lado), LADO_MAXIMO_SALIDA));
+  canvas.width = lado;
+  canvas.height = lado;
+  canvas.getContext('2d')?.drawImage(imagen, recorte.x, recorte.y, recorte.lado, recorte.lado, 0, 0, lado, lado);
+}
+
+/** Esquina destacada del recuadro guía. */
+function Esquina({ posicion }: { posicion: string }) {
+  return <span aria-hidden="true" className={`absolute h-10 w-10 border-white ${posicion}`} />;
 }
 
 /**
@@ -95,9 +115,13 @@ export function Camara() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas || video.videoWidth === 0) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const enPantalla = video.getBoundingClientRect();
+    dibujarRecorte(
+      canvas,
+      video,
+      { ancho: video.videoWidth, alto: video.videoHeight },
+      { ancho: enPantalla.width, alto: enPantalla.height },
+    );
     detener(streamRef.current);
     streamRef.current = null;
     void procesar();
@@ -111,10 +135,14 @@ export function Camara() {
     const url = URL.createObjectURL(archivo);
     const imagen = new Image();
     imagen.onload = () => {
-      canvas.width = imagen.naturalWidth;
-      canvas.height = imagen.naturalHeight;
-      canvas.getContext('2d')?.drawImage(imagen, 0, 0);
       URL.revokeObjectURL(url);
+      if (imagen.naturalWidth === 0 || imagen.naturalHeight === 0) {
+        setEtapa({ tipo: 'manual' });
+        return;
+      }
+      // Sin vista previa: mismo recorte cuadrado centrado sobre la imagen completa.
+      const tamano = { ancho: imagen.naturalWidth, alto: imagen.naturalHeight };
+      dibujarRecorte(canvas, imagen, tamano, tamano);
       void procesar();
     };
     imagen.onerror = () => {
@@ -151,12 +179,22 @@ export function Camara() {
 
       {etapa.tipo === 'captura' && !sinCamara && (
         <div className="flex flex-col gap-3">
-          <video
-            ref={videoRef}
-            playsInline
-            muted
-            className="aspect-[3/4] w-full rounded-xl bg-black object-cover"
-          />
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black">
+            <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
+            {/* Recuadro guía: lo que queda dentro es lo único que se analiza. */}
+            <div
+              aria-hidden="true"
+              className="absolute left-1/2 top-1/2 aspect-square w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-lg border-4 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+            >
+              <Esquina posicion="-left-2 -top-2 rounded-tl-lg border-l-8 border-t-8" />
+              <Esquina posicion="-right-2 -top-2 rounded-tr-lg border-r-8 border-t-8" />
+              <Esquina posicion="-bottom-2 -left-2 rounded-bl-lg border-b-8 border-l-8" />
+              <Esquina posicion="-bottom-2 -right-2 rounded-br-lg border-b-8 border-r-8" />
+            </div>
+            <p className="absolute inset-x-3 bottom-3 rounded-lg bg-black/80 px-3 py-2 text-center text-xl font-bold text-white">
+              Ponga el pez dentro del recuadro
+            </p>
+          </div>
           <BotonGrande onClick={tomarFoto} disabled={!camaraLista}>
             <span className="flex items-center justify-center gap-2">
               <IconoCamara /> Tomar foto
