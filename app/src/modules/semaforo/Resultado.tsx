@@ -88,7 +88,12 @@ export function Resultado() {
       )}
 
       <p className="text-base text-gray-800">
-        Fuente: {especie ? `${resultado.fuente} (${especie.anio})` : 'Sin datos'}
+        Fuente:{' '}
+        {especie
+          ? resultado.fuente.includes(String(especie.anio))
+            ? resultado.fuente
+            : `${resultado.fuente} (${especie.anio})`
+          : 'Sin datos'}
       </p>
 
       {reemplazos.length > 0 && (
