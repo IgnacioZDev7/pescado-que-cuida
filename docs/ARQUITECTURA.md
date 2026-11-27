@@ -165,6 +165,7 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 | anio | entero | `2026` | Sí |
 | foto | archivo | `pacu.webp` | Sí |
 | validado_por | texto | | No |
+| nota | texto | `media; base por confirmar` | No |
 
 `build-data.ts` **rechaza** filas sin fuente o sin base, para que no entre un dato sin respaldo.
 
