@@ -211,12 +211,21 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
 ```
 
 ### 5.4 Reglas de riesgo (validar con la estudiante de BYF antes de programar)
-- `hg ≤ verde_max` → verde; `≤ amarillo_max` → amarillo; mayor → rojo.
-- Valor `<0.5` sin número exacto → **amarillo** (prudente) hasta tener el dato.
-- `base = por_confirmar` → se muestra con advertencia "dato por confirmar".
-- Perfil embarazada o niño con color rojo → mensaje "mejor cambiarlo" + reemplazos verdes del mismo río.
+- **El color depende solo de la especie**: es el mismo para todos los perfiles. El perfil cambia el mensaje y los reemplazos, no el color.
+- Cortes inclusivos: `hg ≤ verde_max` → verde; `hg ≤ amarillo_max` → amarillo; mayor → rojo.
+- Valor `<X` sin número exacto → se usa el color de X (peor caso): `<0.1` → verde, `<0.5` → amarillo, `<1.0` → rojo.
+- Mensaje (`mensajeClave`) según color y perfil:
+
+  | Color | Embarazada o lactancia | Niño | Adulto |
+  |---|---|---|---|
+  | Rojo | `evitar_cambiar` ("mejor cambiarlo") | `evitar_cambiar` | `con_moderacion` |
+  | Amarillo | `con_moderacion` | `con_moderacion` | `elegir_primero` |
+  | Verde | `elegir_primero` | `elegir_primero` | `elegir_primero` |
+
+- Reemplazos: especies del **mismo río**, distintas de la elegida, cuyo color sea verde. Se muestran en todo resultado rojo (cualquier perfil) y en amarillo para embarazada o niño. En los demás casos no hay reemplazos.
+- `base = por_confirmar` → se muestra con la advertencia "Dato por confirmar".
 - **No se muestran porciones numéricas** hasta que haya un cálculo validado por la autoridad sanitaria. Solo se muestran mensajes de frecuencia ("elegir primero", "con moderación", "mejor cambiarlo").
-- Sin datos de la especie → `sin_datos`: "No tenemos análisis de este pez en su río".
+- Sin datos de la especie (especie desconocida o sin valor de mercurio) → `sin_datos`, **nunca verde**: "No tenemos análisis de este pez en su río".
 
 ---
 

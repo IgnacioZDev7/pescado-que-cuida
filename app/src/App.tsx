@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Especie } from './modules/semaforo/Especie';
 import { Inicio } from './modules/semaforo/Inicio';
 import { Perfil } from './modules/semaforo/Perfil';
+import { Resultado } from './modules/semaforo/Resultado';
 import { Rio } from './modules/semaforo/Rio';
 
 export function App() {
@@ -13,6 +14,7 @@ export function App() {
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/rio" element={<Rio />} />
           <Route path="/especie" element={<Especie />} />
+          <Route path="/resultado" element={<Resultado />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
