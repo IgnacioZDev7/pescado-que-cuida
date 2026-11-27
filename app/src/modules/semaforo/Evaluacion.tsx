@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { especiesDelRio, rios } from '../../data/catalogo';
-import { IconoRio } from '../../ui/Iconos';
+import { BotonGrande } from '../../ui/BotonGrande';
+import { IconoCamara, IconoRio } from '../../ui/Iconos';
 import { Opcion, Paso } from '../../ui/Paso';
 import { CuadriculaPeces } from './CuadriculaPeces';
 import { OPCIONES_PERFIL } from './perfiles';
@@ -43,6 +44,11 @@ export function Evaluacion() {
               navegar('/resultado');
             }}
           />
+          <BotonGrande variante="secundario" onClick={() => navegar('/camara')}>
+            <span className="flex items-center justify-center gap-2">
+              <IconoCamara /> Tomar foto del pez
+            </span>
+          </BotonGrande>
         </Paso>
       )}
     </div>
