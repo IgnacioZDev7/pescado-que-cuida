@@ -57,7 +57,9 @@ export function Camara() {
   const [etapa, setEtapa] = useState<Etapa>({ tipo: 'captura' });
   const [sinCamara, setSinCamara] = useState(false);
   const [camaraLista, setCamaraLista] = useState(false);
-  const [hayFoto, setHayFoto] = useState(false);
+  // Foto recortada (data URL) solo en memoria para mostrarla; nunca se guarda.
+  const [fotoTomada, setFotoTomada] = useState<string | null>(null);
+  const procesando = etapa.tipo === 'procesando';
 
   // Precarga el modelo en segundo plano; si no existe, queda en null sin errores.
   useEffect(() => {
@@ -104,7 +106,11 @@ export function Camara() {
   async function procesar() {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    setHayFoto(true);
+    try {
+      setFotoTomada(canvas.toDataURL('image/jpeg', 0.85));
+    } catch {
+      setFotoTomada(null);
+    }
     setEtapa({ tipo: 'procesando' });
     const predicciones = await clasificar(canvas);
     const decision = decidirVision(predicciones, config.umbral_confianza_vision);
@@ -114,7 +120,7 @@ export function Camara() {
   function tomarFoto() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas || video.videoWidth === 0) return;
+    if (procesando || !video || !canvas || video.videoWidth === 0) return;
     const enPantalla = video.getBoundingClientRect();
     dibujarRecorte(
       canvas,
@@ -131,7 +137,8 @@ export function Camara() {
     const archivo = evento.target.files?.[0];
     evento.target.value = '';
     const canvas = canvasRef.current;
-    if (!archivo || !canvas) return;
+    if (procesando || !archivo || !canvas) return;
+    setEtapa({ tipo: 'procesando' });
     const url = URL.createObjectURL(archivo);
     const imagen = new Image();
     imagen.onload = () => {
@@ -161,7 +168,7 @@ export function Camara() {
   }
 
   function otraFoto() {
-    setHayFoto(false);
+    setFotoTomada(null);
     setSinCamara(false);
     setEtapa({ tipo: 'captura' });
   }
@@ -195,7 +202,7 @@ export function Camara() {
               Ponga el pez dentro del recuadro
             </p>
           </div>
-          <BotonGrande onClick={tomarFoto} disabled={!camaraLista}>
+          <BotonGrande onClick={tomarFoto} disabled={!camaraLista || procesando}>
             <span className="flex items-center justify-center gap-2">
               <IconoCamara /> Tomar foto
             </span>
@@ -213,6 +220,7 @@ export function Camara() {
               accept="image/*"
               capture="environment"
               onChange={elegirArchivo}
+              disabled={procesando}
               className="sr-only"
             />
           </label>
@@ -222,17 +230,33 @@ export function Camara() {
         </div>
       )}
 
-      <canvas
-        ref={canvasRef}
-        aria-label="Foto tomada"
-        className={hayFoto && etapa.tipo !== 'captura' ? 'max-h-56 w-full rounded-xl object-contain' : 'hidden'}
-      />
+      {/* Lienzo de trabajo: aquí se dibuja el recorte que se pasa al clasificador. */}
+      <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
 
-      {etapa.tipo === 'procesando' && <p className="text-xl font-semibold text-marino">Mirando la foto…</p>}
+      {etapa.tipo === 'procesando' && (
+        <div className="flex flex-col items-center gap-4">
+          {fotoTomada && (
+            <img src={fotoTomada} alt="Su foto" className="aspect-square w-3/4 rounded-xl object-cover" />
+          )}
+          <div role="status" aria-live="polite" className="flex items-center gap-3 text-xl font-semibold text-marino">
+            <span
+              aria-hidden="true"
+              className="h-8 w-8 animate-spin rounded-full border-4 border-marino/25 border-t-marino"
+            />
+            Reconociendo...
+          </div>
+        </div>
+      )}
 
       {etapa.tipo === 'confirmar' && (
         <section className="flex flex-col gap-3">
           <h2 className="text-xl font-bold text-marino">¿Es este pez?</h2>
+          {fotoTomada && (
+            <figure className="flex flex-col items-center gap-1">
+              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-xl object-cover" />
+              <figcaption className="text-base font-semibold text-gray-800">Su foto</figcaption>
+            </figure>
+          )}
           <ul className="flex flex-col gap-3">
             {opciones.map(({ prediccion, especie }) => (
               <li key={especie.id}>
@@ -258,6 +282,12 @@ export function Camara() {
 
       {etapa.tipo === 'manual' && (
         <div className="flex flex-col gap-6">
+          {fotoTomada && (
+            <figure className="flex flex-col items-center gap-1">
+              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-xl object-cover" />
+              <figcaption className="text-base font-semibold text-gray-800">Su foto</figcaption>
+            </figure>
+          )}
           <p className="rounded-xl border-2 border-marino bg-marino/10 p-3 text-xl font-semibold text-marino">
             Elija el pez de la lista
           </p>
