@@ -33,7 +33,7 @@ Versión 0.1 · 27/11/2026 · Estado: propuesta del equipo, para revisar y aprob
 | ID | Requisito | Meta medible |
 |---|---|---|
 | RNF-01 | Sin conexión | Todas las funciones de la demo operan en modo avión |
-| RNF-02 | Dispositivo mínimo | Android 8 o superior, 2 GB de RAM, Chrome |
+| RNF-02 | Dispositivo mínimo | Android 8 o superior, 2 GB de RAM; WebView de Android (Chrome) actualizado |
 | RNF-03 | Peso | App (sin modelo) < 3 MB; modelo de visión < 6 MB; audios < 10 MB por lengua |
 | RNF-04 | Velocidad | Inferencia de visión < 1,5 s en un celular de gama baja; primera carga < 5 s con 4G |
 | RNF-05 | Accesible para quien no lee | Todo paso clave tiene ícono + audio; botones ≥ 48 px; alto contraste |
@@ -47,7 +47,7 @@ Versión 0.1 · 27/11/2026 · Estado: propuesta del equipo, para revisar y aprob
 ## 2. Arquitectura
 
 ### 2.1 Decisión principal: offline-first, sin servidor en la fase 1
-Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el navegador y luego funciona sin internet. No hay backend en la fase 1 porque el usuario no tiene conexión estable y un servidor agrega costo y puntos de falla. El backend llega en la fase 2, solo para sincronizar el monitoreo.
+Todo corre **en el teléfono**. La app se empaqueta y se distribuye como un **APK Android con Capacitor**: es la misma app web envuelta en un WebView, que se instala una vez y luego funciona sin internet. La **PWA** instalable desde el navegador queda como respaldo. No hay backend en la fase 1 porque el usuario no tiene conexión estable y un servidor agrega costo y puntos de falla. El backend llega en la fase 2, solo para sincronizar el monitoreo.
 
 ### 2.2 Vista general
 ```
@@ -93,7 +93,8 @@ Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el naveg
 | Estilos | Tailwind CSS 3.4 | Botones grandes y accesibles rápido, CSS liviano |
 | Navegación | React Router 6 | 4 o 5 pantallas simples |
 | Estado | Zustand 4.5 | Estado global mínimo (perfil, río, especie elegida) |
-| PWA / offline | vite-plugin-pwa 0.20 (Workbox) | Precarga del modelo, audios y datos |
+| Distribución | Capacitor 8.6 (APK Android); build con JDK 21 (Gradle 8.14 no soporta Java 25) | Envuelve la misma build web en un APK instalable; sin reescribir la app en nativo |
+| PWA / offline | vite-plugin-pwa 0.20 (Workbox) | Respaldo instalable desde el navegador; precarga del modelo, audios y datos para uso sin conexión |
 | Almacenamiento local | Dexie 4 (IndexedDB) | Registros de monitoreo y preferencias sin conexión |
 | Visión en el teléfono | @tensorflow/tfjs 4.22 (backend WebGL, con WASM de respaldo) | Inferencia local sin servidor |
 | Entrenamiento | Python 3.11 + TensorFlow/Keras 2.x, MobileNetV3-Small preentrenado en ImageNet | Liviano, pensado para móviles |
@@ -104,7 +105,26 @@ Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el naveg
 | CI/CD | GitHub Actions → GitHub Pages | Gratis; cada merge a main publica la demo |
 | Fase 2 backend | FastAPI + PostgreSQL 16 + PostGIS | Datos geográficos del monitoreo; libre y barato |
 
-**Lo que NO usamos, y por qué:** LLM o chatbot generativo para el usuario final (no hay internet; riesgo de errores en salud); traducción automática de lenguas indígenas (no existen modelos confiables); app nativa en Android Studio (más lenta de construir; la PWA cubre lo necesario y luego se puede envolver con Capacitor); Firebase (depende de conexión y de un proveedor).
+**Lo que NO usamos, y por qué:** LLM o chatbot generativo para el usuario final (no hay internet; riesgo de errores en salud); traducción automática de lenguas indígenas (no existen modelos confiables); app nativa escrita en Android Studio (más lenta de construir; la app web cubre lo necesario y Capacitor la empaqueta como APK sin código nativo propio); Firebase (depende de conexión y de un proveedor).
+
+### 3.1 Generar el APK
+**Requisito para generar el APK: JDK 21 (Gradle 8.14 de Capacitor no soporta JDK 25).** El JBR que trae Android Studio reciente es JDK 25: con ese, Gradle falla con `Unsupported class file major version 69`.
+
+1. Instalar el JDK 21 (Windows):
+   ```powershell
+   winget install --id EclipseAdoptium.Temurin.21.JDK -e
+   ```
+2. Apuntar `JAVA_HOME` al JDK 21 (la carpeta exacta depende de la versión instalada):
+   ```powershell
+   # Solo para la terminal actual (PowerShell)
+   $env:JAVA_HOME = (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+
+   # Permanente para el usuario (abrir una terminal nueva después)
+   setx JAVA_HOME (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+   ```
+   En Git Bash: `export JAVA_HOME="$(ls -d /c/Program\ Files/Eclipse\ Adoptium/jdk-21*)"`.
+3. El SDK de Android se toma de `app/android/local.properties` (no se versiona) o de `ANDROID_HOME`. En `local.properties` usar barras normales: `sdk.dir=C:/Users/<usuario>/AppData/Local/Android/Sdk`. Con barras invertidas sin escapar (`C:\Users\...`), Java lee `\U` como `U` y Gradle falla con "El nombre de archivo... no son correctos".
+4. Desde `app/`: `npm run apk` (build web + `cap sync android` + `assembleDebug`). El APK queda en `app/android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 
@@ -117,6 +137,8 @@ pescado-que-cuida/
 │   ├── frases.csv
 │   └── config.json               # cortes del semáforo, porción, referencia
 ├── app/
+│   ├── android/                  # proyecto Android generado por Capacitor
+│   ├── capacitor.config.ts       # appId, nombre y carpeta web (dist)
 │   ├── public/
 │   │   ├── model/                # model.json + shards (exportado de ml/)
 │   │   ├── audio/<lengua>/*.ogg
@@ -270,7 +292,7 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
 |---|---|
 | **Demo (sábado 28)** | RF-01 a RF-07 con datos del Beni; visión con 4 a 6 especies; audios de prueba |
 | **Fase 1 (piloto, 0–6 meses)** | Audios reales en ese ejja grabados por hablantes nativos; generador de tarjetas; nombres locales; aval sanitario; métricas de uso anónimas en el dispositivo |
-| **Fase 2 (6–18 meses)** | Monitoreo participativo (RF-10, RF-11) con FastAPI + PostgreSQL/PostGIS; más cuencas y lenguas; reentrenar el modelo con fotos reales; envolver la app con Capacitor si hace falta publicarla en Play Store |
+| **Fase 2 (6–18 meses)** | Monitoreo participativo (RF-10, RF-11) con FastAPI + PostgreSQL/PostGIS; más cuencas y lenguas; reentrenar el modelo con fotos reales; publicar en Play Store (APK/AAB release firmado) |
 
 ## 10. Riesgos técnicos
 | Riesgo | Mitigación |

@@ -9,9 +9,12 @@
     "dev": "vite",
     "build": "npm run build-data && tsc -b && vite build",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "apk": "npm run build && cap sync android && node scripts/assemble-debug.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "8.6.3",
+    "@capacitor/core": "8.6.3",
     "dexie": "^4.0.10",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -19,6 +22,7 @@
     "zustand": "^4.5.5"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.6.3",
     "@types/node": "^22.10.0",
     "@types/papaparse": "^5.3.15",
     "@types/react": "^18.3.12",

@@ -17,12 +17,32 @@ En el mismo río, el mercurio varía hasta 27 veces entre especies. Proponemos:
 ## Arquitectura (en desarrollo)
 | Pieza | Tecnología |
 |---|---|
-| App | PWA: React + Vite + TypeScript, sin conexión (service worker) |
+| App | React + Vite + TypeScript, sin conexión; se distribuye como APK Android con Capacitor (la PWA queda como respaldo) |
 | Datos | CSV abierto convertido a JSON |
 | Visión | Transfer learning con MobileNetV3 → TensorFlow.js en el teléfono, con un dataset propio |
 | Audio | Frases pregrabadas + pictogramas |
 
 El modelo predice la **especie**, nunca el color. El color sale de la tabla de datos según quién va a comer.
+
+## Generar el APK
+**Requisito para generar el APK: JDK 21 (Gradle 8.14 de Capacitor no soporta JDK 25).** Además se necesita el SDK de Android (viene con Android Studio).
+
+```powershell
+# 1. Instalar el JDK 21
+winget install --id EclipseAdoptium.Temurin.21.JDK -e
+
+# 2. Apuntar JAVA_HOME al JDK 21 (solo esta terminal de PowerShell)
+$env:JAVA_HOME = (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+#    o de forma permanente para el usuario (abrir una terminal nueva después):
+#    setx JAVA_HOME (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+
+# 3. Generar el APK debug
+cd app
+npm install
+npm run apk
+```
+
+El APK queda en `app/android/app/build/outputs/apk/debug/app-debug.apk`. Más detalle en [docs/ARQUITECTURA.md §3.1](docs/ARQUITECTURA.md#31-generar-el-apk).
 
 ## Fuentes principales
 - Loayza E. et al. *J. Food Comp. Anal.* 2026;150:108840
