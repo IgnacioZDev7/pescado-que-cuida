@@ -111,6 +111,42 @@ export function IconoPregunta(p: Props) {
   );
 }
 
+export function IconoEmbarazada(p: Props) {
+  return (
+    <Base {...p}>
+      <circle cx="11" cy="4.5" r="2.5" />
+      <path d="M10 8c-1.5 1-2 3-2 5v3h2v5h3v-4c2.5-.5 4-2 4-4s-1.5-3.5-4-3.5L12 8z" />
+    </Base>
+  );
+}
+
+export function IconoNino(p: Props) {
+  return (
+    <Base {...p}>
+      <circle cx="12" cy="7" r="3" />
+      <path d="M8 21v-5l-2-3 3-2h6l3 2-2 3v5" />
+    </Base>
+  );
+}
+
+export function IconoAdulto(p: Props) {
+  return (
+    <Base {...p}>
+      <circle cx="9" cy="6" r="2.5" />
+      <circle cx="16" cy="7" r="2" />
+      <path d="M4 20v-4a5 5 0 0 1 10 0v4M14 13.5a4 4 0 0 1 6 3.5v3" />
+    </Base>
+  );
+}
+
+export function IconoRio(p: Props) {
+  return (
+    <Base {...p}>
+      <path d="M3 8c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />
+    </Base>
+  );
+}
+
 export function IconoSonido(p: Props) {
   return (
     <Base {...p}>

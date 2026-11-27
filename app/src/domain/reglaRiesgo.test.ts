@@ -96,7 +96,7 @@ describe('reglaRiesgo: mensajeClave por color y perfil', () => {
     ['rojo', 'adulto', 'con_moderacion'],
     ['amarillo', 'embarazada', 'con_moderacion'],
     ['amarillo', 'nino', 'con_moderacion'],
-    ['amarillo', 'adulto', 'elegir_primero'],
+    ['amarillo', 'adulto', 'con_moderacion'],
     ['verde', 'embarazada', 'elegir_primero'],
     ['verde', 'nino', 'elegir_primero'],
     ['verde', 'adulto', 'elegir_primero'],

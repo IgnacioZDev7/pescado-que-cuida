@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { Evaluacion } from './modules/semaforo/Evaluacion';
 import { Resultado } from './modules/semaforo/Resultado';
 import { BarraNavegacion } from './ui/BarraNavegacion';
 import { Encabezado } from './ui/Encabezado';
@@ -13,7 +14,7 @@ export function App() {
         <main className="mx-auto max-w-md px-4 pb-28 pt-4">
           <Routes>
             <Route path="/" element={<Navigate to="/evaluacion" replace />} />
-            <Route path="/evaluacion" element={<EnPreparacion titulo="Evaluación" />} />
+            <Route path="/evaluacion" element={<Evaluacion />} />
             <Route path="/camara" element={<EnPreparacion titulo="Cámara" />} />
             <Route path="/resultado" element={<Resultado />} />
             <Route path="/lenguas" element={<EnPreparacion titulo="Lenguas" />} />
