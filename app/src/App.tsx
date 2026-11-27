@@ -1,11 +1,11 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Paciente } from './modules/paciente/Paciente';
 import { Evaluacion } from './modules/semaforo/Evaluacion';
-import { Camara } from './modules/vision/Camara';
 import { Resultado } from './modules/semaforo/Resultado';
+import { Camara } from './modules/vision/Camara';
+import { Lenguas } from './modules/voz/Lenguas';
 import { BarraNavegacion } from './ui/BarraNavegacion';
 import { Encabezado } from './ui/Encabezado';
-import { EnPreparacion } from './ui/EnPreparacion';
 
 export function App() {
   return (
@@ -19,7 +19,7 @@ export function App() {
             <Route path="/evaluacion" element={<Evaluacion />} />
             <Route path="/camara" element={<Camara />} />
             <Route path="/resultado" element={<Resultado />} />
-            <Route path="/lenguas" element={<EnPreparacion titulo="Lenguas" />} />
+            <Route path="/lenguas" element={<Lenguas />} />
             <Route path="/paciente" element={<Paciente />} />
             <Route path="*" element={<Navigate to="/evaluacion" replace />} />
           </Routes>
