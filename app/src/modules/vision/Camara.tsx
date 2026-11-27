@@ -265,7 +265,7 @@ export function Camara() {
                   onClick={() => confirmarEspecie(especie)}
                   className="flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-xl border-2 border-marino/40 bg-white text-left"
                 >
-                  <FotoPez key={especie.foto} foto={especie.foto} nombre={especie.nombreComun} className="h-20 w-24 shrink-0" />
+                  <FotoPez key={especie.foto} foto={especie.foto} className="h-20 w-24 shrink-0" />
                   <span className="flex-1 text-xl font-bold text-marino">{especie.nombreComun}</span>
                   <span className="mr-3 text-lg font-semibold text-gray-800">
                     {Math.round(prediccion.confianza * 100)} %

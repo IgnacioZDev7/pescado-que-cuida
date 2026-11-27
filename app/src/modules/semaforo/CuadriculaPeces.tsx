@@ -28,7 +28,7 @@ export function CuadriculaPeces({ especies, onElegir, seleccionadoId }: Props) {
                 elegido ? 'border-marino ring-2 ring-marino' : 'border-marino/30'
               }`}
             >
-              <FotoPez key={especie.foto} foto={especie.foto} nombre={especie.nombreComun} className="h-24 w-full" />
+              <FotoPez key={especie.foto} foto={especie.foto} className="h-24 w-full" />
               <span className="px-2 pt-2 text-lg font-bold text-marino">{especie.nombreComun}</span>
               {locales.length > 0 && <span className="px-2 text-sm text-gray-700">{locales.join(' · ')}</span>}
             </button>

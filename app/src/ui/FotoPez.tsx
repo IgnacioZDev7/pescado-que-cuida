@@ -3,26 +3,22 @@ import { IconoPez } from './Iconos';
 
 interface Props {
   foto: string;
-  nombre: string;
   className?: string;
 }
 
 /**
  * Foto de una especie desde public/img/peces. Si la imagen no existe o falla,
- * muestra una silueta neutra con el nombre en lugar de romper la pantalla.
+ * muestra una silueta neutra en lugar de romper la pantalla.
+ * Es decorativa: el nombre del pez lo muestra siempre la tarjeta que la contiene,
+ * así aparece una sola vez (en pantalla y para lectores de pantalla).
  */
-export function FotoPez({ foto, nombre, className = '' }: Props) {
+export function FotoPez({ foto, className = '' }: Props) {
   const [fallo, setFallo] = useState(false);
 
   if (fallo || foto === '') {
     return (
-      <div
-        role="img"
-        aria-label={nombre}
-        className={`flex flex-col items-center justify-center gap-1 bg-marino/10 p-2 text-marino ${className}`}
-      >
+      <div aria-hidden="true" className={`flex items-center justify-center bg-marino/10 p-2 text-marino ${className}`}>
         <IconoPez width={48} height={48} />
-        <span className="text-center text-sm font-semibold leading-tight">{nombre}</span>
       </div>
     );
   }
@@ -30,7 +26,7 @@ export function FotoPez({ foto, nombre, className = '' }: Props) {
   return (
     <img
       src={`${import.meta.env.BASE_URL}img/peces/${foto}`}
-      alt={nombre}
+      alt=""
       onError={() => setFallo(true)}
       className={`object-cover ${className}`}
     />

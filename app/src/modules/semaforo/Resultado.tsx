@@ -63,7 +63,6 @@ export function Resultado() {
           <FotoPez
             key={especie.foto}
             foto={especie.foto}
-            nombre={especie.nombreComun}
             className="h-20 w-24 shrink-0 rounded-xl"
           />
         )}
@@ -111,7 +110,7 @@ export function Resultado() {
                   }}
                   className="flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-xl border-2 border-verde bg-white text-left"
                 >
-                  <FotoPez key={otra.foto} foto={otra.foto} nombre={otra.nombreComun} className="h-20 w-24 shrink-0" />
+                  <FotoPez key={otra.foto} foto={otra.foto} className="h-20 w-24 shrink-0" />
                   <span className="flex-1 text-xl font-bold text-marino">{otra.nombreComun}</span>
                   <span className="mr-3 flex items-center gap-1 rounded-full bg-verde px-2 py-1 text-sm font-bold text-white">
                     <IconoCheck width={18} height={18} /> Mejor opción
