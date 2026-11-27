@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { buscarEspecie, config, especies } from '../../data/catalogo';
+import { buscarEspecie, config, especies, rios } from '../../data/catalogo';
 import { reglaRiesgo } from '../../domain/reglaRiesgo';
 import type { Especie } from '../../domain/tipos';
 import { BotonGrande } from '../../ui/BotonGrande';
@@ -26,7 +26,9 @@ export function Resultado() {
   const navegar = useNavigate();
   const { perfil, rio, especieId, setEspecieId, reiniciar } = useSeleccion();
 
-  if (!perfil || !rio || !especieId) {
+  // Lo guardado en el dispositivo puede no existir ya en el catálogo: se trata como sin selección.
+  const especie = especieId ? buscarEspecie(especieId) : undefined;
+  if (!perfil || !rio || !rios.includes(rio) || !especie || especie.rio !== rio) {
     return (
       <section className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold text-marino">Resultado</h1>
@@ -41,7 +43,6 @@ export function Resultado() {
     );
   }
 
-  const especie = buscarEspecie(especieId);
   // El riesgo lo decide solo el dominio; esta pantalla solo lo presenta.
   const resultado = reglaRiesgo(especie, perfil, config, especies);
   const reemplazos = resultado.reemplazos
