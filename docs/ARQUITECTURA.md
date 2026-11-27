@@ -33,7 +33,7 @@ Versión 0.1 · 27/11/2026 · Estado: propuesta del equipo, para revisar y aprob
 | ID | Requisito | Meta medible |
 |---|---|---|
 | RNF-01 | Sin conexión | Todas las funciones de la demo operan en modo avión |
-| RNF-02 | Dispositivo mínimo | Android 8 o superior, 2 GB de RAM, Chrome |
+| RNF-02 | Dispositivo mínimo | Android 8 o superior, 2 GB de RAM; WebView de Android (Chrome) actualizado |
 | RNF-03 | Peso | App (sin modelo) < 3 MB; modelo de visión < 6 MB; audios < 10 MB por lengua |
 | RNF-04 | Velocidad | Inferencia de visión < 1,5 s en un celular de gama baja; primera carga < 5 s con 4G |
 | RNF-05 | Accesible para quien no lee | Todo paso clave tiene ícono + audio; botones ≥ 48 px; alto contraste |
@@ -47,7 +47,7 @@ Versión 0.1 · 27/11/2026 · Estado: propuesta del equipo, para revisar y aprob
 ## 2. Arquitectura
 
 ### 2.1 Decisión principal: offline-first, sin servidor en la fase 1
-Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el navegador y luego funciona sin internet. No hay backend en la fase 1 porque el usuario no tiene conexión estable y un servidor agrega costo y puntos de falla. El backend llega en la fase 2, solo para sincronizar el monitoreo.
+Todo corre **en el teléfono**. La app se empaqueta y se distribuye como un **APK Android con Capacitor**: es la misma app web envuelta en un WebView, que se instala una vez y luego funciona sin internet. La **PWA** instalable desde el navegador queda como respaldo. No hay backend en la fase 1 porque el usuario no tiene conexión estable y un servidor agrega costo y puntos de falla. El backend llega en la fase 2, solo para sincronizar el monitoreo.
 
 ### 2.2 Vista general
 ```
@@ -93,7 +93,8 @@ Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el naveg
 | Estilos | Tailwind CSS 3.4 | Botones grandes y accesibles rápido, CSS liviano |
 | Navegación | React Router 6 | 4 o 5 pantallas simples |
 | Estado | Zustand 4.5 | Estado global mínimo (perfil, río, especie elegida) |
-| PWA / offline | vite-plugin-pwa 0.20 (Workbox) | Precarga del modelo, audios y datos |
+| Distribución | Capacitor 8.6 (APK Android); build con JDK 21 (Gradle 8.14 no soporta Java 25) | Envuelve la misma build web en un APK instalable; sin reescribir la app en nativo |
+| PWA / offline | vite-plugin-pwa 0.20 (Workbox) | Respaldo instalable desde el navegador; precarga del modelo, audios y datos para uso sin conexión |
 | Almacenamiento local | Dexie 4 (IndexedDB) | Registros de monitoreo y preferencias sin conexión |
 | Visión en el teléfono | @tensorflow/tfjs 4.22 (backend WebGL, con WASM de respaldo) | Inferencia local sin servidor |
 | Entrenamiento | Python 3.11 + TensorFlow/Keras 2.x, MobileNetV3-Small preentrenado en ImageNet | Liviano, pensado para móviles |
@@ -104,7 +105,26 @@ Todo corre **en el teléfono**. La app es una **PWA**: se instala desde el naveg
 | CI/CD | GitHub Actions → GitHub Pages | Gratis; cada merge a main publica la demo |
 | Fase 2 backend | FastAPI + PostgreSQL 16 + PostGIS | Datos geográficos del monitoreo; libre y barato |
 
-**Lo que NO usamos, y por qué:** LLM o chatbot generativo para el usuario final (no hay internet; riesgo de errores en salud); traducción automática de lenguas indígenas (no existen modelos confiables); app nativa en Android Studio (más lenta de construir; la PWA cubre lo necesario y luego se puede envolver con Capacitor); Firebase (depende de conexión y de un proveedor).
+**Lo que NO usamos, y por qué:** LLM o chatbot generativo para el usuario final (no hay internet; riesgo de errores en salud); traducción automática de lenguas indígenas (no existen modelos confiables); app nativa escrita en Android Studio (más lenta de construir; la app web cubre lo necesario y Capacitor la empaqueta como APK sin código nativo propio); Firebase (depende de conexión y de un proveedor).
+
+### 3.1 Generar el APK
+**Requisito para generar el APK: JDK 21 (Gradle 8.14 de Capacitor no soporta JDK 25).** El JBR que trae Android Studio reciente es JDK 25: con ese, Gradle falla con `Unsupported class file major version 69`.
+
+1. Instalar el JDK 21 (Windows):
+   ```powershell
+   winget install --id EclipseAdoptium.Temurin.21.JDK -e
+   ```
+2. Apuntar `JAVA_HOME` al JDK 21 (la carpeta exacta depende de la versión instalada):
+   ```powershell
+   # Solo para la terminal actual (PowerShell)
+   $env:JAVA_HOME = (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+
+   # Permanente para el usuario (abrir una terminal nueva después)
+   setx JAVA_HOME (Resolve-Path "C:\Program Files\Eclipse Adoptium\jdk-21*").Path
+   ```
+   En Git Bash: `export JAVA_HOME="$(ls -d /c/Program\ Files/Eclipse\ Adoptium/jdk-21*)"`.
+3. El SDK de Android se toma de `app/android/local.properties` (no se versiona) o de `ANDROID_HOME`. En `local.properties` usar barras normales: `sdk.dir=C:/Users/<usuario>/AppData/Local/Android/Sdk`. Con barras invertidas sin escapar (`C:\Users\...`), Java lee `\U` como `U` y Gradle falla con "El nombre de archivo... no son correctos".
+4. Desde `app/`: `npm run apk` (build web + `cap sync android` + `assembleDebug`). El APK queda en `app/android/app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 
@@ -117,6 +137,8 @@ pescado-que-cuida/
 │   ├── frases.csv
 │   └── config.json               # cortes del semáforo, porción, referencia
 ├── app/
+│   ├── android/                  # proyecto Android generado por Capacitor
+│   ├── capacitor.config.ts       # appId, nombre y carpeta web (dist)
 │   ├── public/
 │   │   ├── model/                # model.json + shards (exportado de ml/)
 │   │   ├── audio/<lengua>/*.ogg
@@ -165,6 +187,7 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 | anio | entero | `2026` | Sí |
 | foto | archivo | `pacu.webp` | Sí |
 | validado_por | texto | | No |
+| nota | texto | `media; base por confirmar` | No |
 
 `build-data.ts` **rechaza** filas sin fuente o sin base, para que no entre un dato sin respaldo.
 
@@ -184,17 +207,25 @@ El **dataset de fotos no va al repo**: va en Drive, y en el repo solo `labels.js
 ```ts
 type Perfil = 'embarazada' | 'nino' | 'adulto';
 type Color = 'verde' | 'amarillo' | 'rojo' | 'sin_datos';
+type Base = 'humedo' | 'seco' | 'por_confirmar';
+type HgTipo = 'total' | 'metilmercurio';
 
 interface Especie { id: string; rio: string; nombreComun: string; nombreCientifico?: string;
   nombresLocales: Record<string, string>; hgUgG: number | null; hgMenorQue?: number;
-  base: 'humedo' | 'seco' | 'por_confirmar'; fuente: string; anio: number; foto: string; }
+  hgTipo: HgTipo; base: Base; nMuestras?: number; tamanoCm?: string;
+  fuente: string; anio: number; foto: string; validadoPor?: string; nota?: string; }
 
 interface Resultado { color: Color; mensajeClave: string;   // id de frase con audio
   reemplazos: string[];                                       // ids de especies verdes del mismo río
   fuente: string; advertencia?: string; }
 
-// Dominio: función pura y testeada
-function reglaRiesgo(e: Especie, p: Perfil, c: Config): Resultado;
+interface Config { version_datos: string; referencia: string; porcion_g: number;
+  cortes_ug_g: { verde_max: number; amarillo_max: number }; perfiles: Perfil[];
+  umbral_confianza_vision: number; nota?: string; }
+
+// Dominio: función pura y testeada.
+// El catálogo se recibe como parámetro para calcular los reemplazos en forma pura.
+function reglaRiesgo(e: Especie | undefined, p: Perfil, c: Config, catalogo?: Especie[]): Resultado;
 
 // ML: nunca devuelve color
 interface Prediccion { especieId: string | 'otro'; confianza: number; }
@@ -202,12 +233,21 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
 ```
 
 ### 5.4 Reglas de riesgo (validar con la estudiante de BYF antes de programar)
-- `hg ≤ verde_max` → verde; `≤ amarillo_max` → amarillo; mayor → rojo.
-- Valor `<0.5` sin número exacto → **amarillo** (prudente) hasta tener el dato.
-- `base = por_confirmar` → se muestra con advertencia "dato por confirmar".
-- Perfil embarazada o niño con color rojo → mensaje "mejor cambiarlo" + reemplazos verdes del mismo río.
+- **El color depende solo de la especie**: es el mismo para todos los perfiles. El perfil cambia el mensaje y los reemplazos, no el color.
+- Cortes inclusivos: `hg ≤ verde_max` → verde; `hg ≤ amarillo_max` → amarillo; mayor → rojo.
+- Valor `<X` sin número exacto → se usa el color de X (peor caso): `<0.1` → verde, `<0.5` → amarillo, `<1.0` → rojo.
+- Mensaje (`mensajeClave`) según color y perfil:
+
+  | Color | Embarazada o lactancia | Niño | Adulto |
+  |---|---|---|---|
+  | Rojo | `evitar_cambiar` ("mejor cambiarlo") | `evitar_cambiar` | `con_moderacion` |
+  | Amarillo | `con_moderacion` | `con_moderacion` | `con_moderacion` |
+  | Verde | `elegir_primero` | `elegir_primero` | `elegir_primero` |
+
+- Reemplazos: especies del **mismo río**, distintas de la elegida, cuyo color sea verde. Se muestran en todo resultado rojo (cualquier perfil) y en amarillo para embarazada o niño. En los demás casos no hay reemplazos.
+- `base = por_confirmar` → se muestra con la advertencia "Dato por confirmar".
 - **No se muestran porciones numéricas** hasta que haya un cálculo validado por la autoridad sanitaria. Solo se muestran mensajes de frecuencia ("elegir primero", "con moderación", "mejor cambiarlo").
-- Sin datos de la especie → `sin_datos`: "No tenemos análisis de este pez en su río".
+- Sin datos de la especie (especie desconocida o sin valor de mercurio) → `sin_datos`, **nunca verde**: "No tenemos análisis de este pez en su río".
 
 ---
 
@@ -252,7 +292,7 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
 |---|---|
 | **Demo (sábado 28)** | RF-01 a RF-07 con datos del Beni; visión con 4 a 6 especies; audios de prueba |
 | **Fase 1 (piloto, 0–6 meses)** | Audios reales en ese ejja grabados por hablantes nativos; generador de tarjetas; nombres locales; aval sanitario; métricas de uso anónimas en el dispositivo |
-| **Fase 2 (6–18 meses)** | Monitoreo participativo (RF-10, RF-11) con FastAPI + PostgreSQL/PostGIS; más cuencas y lenguas; reentrenar el modelo con fotos reales; envolver la app con Capacitor si hace falta publicarla en Play Store |
+| **Fase 2 (6–18 meses)** | Monitoreo participativo (RF-10, RF-11) con FastAPI + PostgreSQL/PostGIS; más cuencas y lenguas; reentrenar el modelo con fotos reales; publicar en Play Store (APK/AAB release firmado) |
 
 ## 10. Riesgos técnicos
 | Riesgo | Mitigación |

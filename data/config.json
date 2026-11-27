@@ -1,6 +1,9 @@
 {
+  "version_datos": "2026-11-27",
   "referencia": "JECFA 2006 - ISTP metilmercurio 1.6 ug/kg pc/semana",
   "porcion_g": 150,
   "cortes_ug_g": { "verde_max": 0.2, "amarillo_max": 0.5 },
+  "perfiles": ["embarazada", "nino", "adulto"],
+  "umbral_confianza_vision": 0.75,
   "nota": "Cortes propuestos, pendientes de validacion sanitaria. Las porciones por grupo se calculan con datos locales; verde no significa riesgo cero."
 }
