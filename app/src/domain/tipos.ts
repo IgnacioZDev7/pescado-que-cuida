@@ -54,6 +54,9 @@ export interface Frase {
   archivoAudio?: string;
   pictograma?: string;
   validadoPor?: string;
+  /** Texto en la lengua indígena, copiado tal cual de la fuente. */
+  textoLengua?: string;
+  fuenteTraduccion?: string;
 }
 
 /** Salida del clasificador de visión: nunca devuelve un color. */

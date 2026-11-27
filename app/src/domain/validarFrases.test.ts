@@ -57,4 +57,19 @@ describe('validarFrases', () => {
     expect(frases).toEqual([{ id: 'saludo', es: 'Buenos días' }]);
     expect(errores).toEqual([{ fila: 3, mensaje: 'id duplicado: saludo' }]);
   });
+
+  it('copia el texto en lengua exacto y su fuente', () => {
+    const { frases, errores } = validarFrases([
+      fila({ lengua: 'Ese Ejja', texto_lengua: 'Achejjo ba’e ami', fuente_traduccion: '[FUENTE]' }),
+    ]);
+    expect(errores).toEqual([]);
+    expect(frases[0].textoLengua).toBe('Achejjo ba’e ami');
+    expect(frases[0].fuenteTraduccion).toBe('[FUENTE]');
+  });
+
+  it('deja sin definir texto en lengua y fuente cuando faltan las columnas', () => {
+    const { frases } = validarFrases([fila()]);
+    expect(frases[0].textoLengua).toBeUndefined();
+    expect(frases[0].fuenteTraduccion).toBeUndefined();
+  });
 });
