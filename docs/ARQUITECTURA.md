@@ -241,7 +241,7 @@ function clasificar(img: HTMLCanvasElement): Promise<Prediccion[]>; // top-3
   | Color | Embarazada o lactancia | Niño | Adulto |
   |---|---|---|---|
   | Rojo | `evitar_cambiar` ("mejor cambiarlo") | `evitar_cambiar` | `con_moderacion` |
-  | Amarillo | `con_moderacion` | `con_moderacion` | `elegir_primero` |
+  | Amarillo | `con_moderacion` | `con_moderacion` | `con_moderacion` |
   | Verde | `elegir_primero` | `elegir_primero` | `elegir_primero` |
 
 - Reemplazos: especies del **mismo río**, distintas de la elegida, cuyo color sea verde. Se muestran en todo resultado rojo (cualquier perfil) y en amarillo para embarazada o niño. En los demás casos no hay reemplazos.

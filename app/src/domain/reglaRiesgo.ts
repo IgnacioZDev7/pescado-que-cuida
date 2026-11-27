@@ -63,7 +63,7 @@ function mensajeClave(color: Exclude<Color, 'sin_datos'>, p: Perfil): string {
     case 'rojo':
       return esSensible(p) ? 'evitar_cambiar' : 'con_moderacion';
     case 'amarillo':
-      return esSensible(p) ? 'con_moderacion' : 'elegir_primero';
+      return 'con_moderacion';
     case 'verde':
       return 'elegir_primero';
   }

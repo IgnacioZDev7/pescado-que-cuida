@@ -1,23 +1,31 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Especie } from './modules/semaforo/Especie';
-import { Inicio } from './modules/semaforo/Inicio';
-import { Perfil } from './modules/semaforo/Perfil';
+import { Paciente } from './modules/paciente/Paciente';
+import { Evaluacion } from './modules/semaforo/Evaluacion';
 import { Resultado } from './modules/semaforo/Resultado';
-import { Rio } from './modules/semaforo/Rio';
+import { Camara } from './modules/vision/Camara';
+import { Lenguas } from './modules/voz/Lenguas';
+import { BarraNavegacion } from './ui/BarraNavegacion';
+import { Encabezado } from './ui/Encabezado';
 
 export function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
-      <main className="mx-auto min-h-screen max-w-md bg-white p-4 text-gray-900">
-        <Routes>
-          <Route path="/" element={<Inicio />} />
-          <Route path="/perfil" element={<Perfil />} />
-          <Route path="/rio" element={<Rio />} />
-          <Route path="/especie" element={<Especie />} />
-          <Route path="/resultado" element={<Resultado />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+      <div className="min-h-screen bg-fondo text-gray-900">
+        <Encabezado />
+        {/* Padding inferior para que la barra fija no tape el contenido. */}
+        <main className="mx-auto max-w-md px-4 pb-28 pt-4">
+          <Routes>
+            <Route path="/" element={<Navigate to="/evaluacion" replace />} />
+            <Route path="/evaluacion" element={<Evaluacion />} />
+            <Route path="/camara" element={<Camara />} />
+            <Route path="/resultado" element={<Resultado />} />
+            <Route path="/lenguas" element={<Lenguas />} />
+            <Route path="/paciente" element={<Paciente />} />
+            <Route path="*" element={<Navigate to="/evaluacion" replace />} />
+          </Routes>
+        </main>
+        <BarraNavegacion />
+      </div>
     </BrowserRouter>
   );
 }

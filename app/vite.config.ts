@@ -21,7 +21,9 @@ export default defineConfig({
         icons: [{ src: 'icono.svg', sizes: 'any', type: 'image/svg+xml' }],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,json,webp,ogg,svg}'],
+        globPatterns: ['**/*.{js,css,html,json,webp,ogg,svg,bin}'],
+        // El modelo de visión y TensorFlow.js superan el límite por defecto de 2 MB.
+        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
     }),
   ],

@@ -46,6 +46,16 @@ export interface Config {
   nota?: string;
 }
 
+/** Frase de data/frases.csv; los campos vacíos quedan sin definir. */
+export interface Frase {
+  id: string;
+  es: string;
+  lengua?: string;
+  archivoAudio?: string;
+  pictograma?: string;
+  validadoPor?: string;
+}
+
 /** Salida del clasificador de visión: nunca devuelve un color. */
 export interface Prediccion {
   especieId: string | 'otro';
