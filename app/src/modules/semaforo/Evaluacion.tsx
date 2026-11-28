@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { especiesDelRio, rios } from '../../data/catalogo';
 import { BotonGrande } from '../../ui/BotonGrande';
 import { IconoCamara, IconoRio } from '../../ui/Iconos';
-import { Opcion, Paso } from '../../ui/Paso';
+import { Chip, IconoOpcion, Opcion, Paso } from '../../ui/Paso';
 import { CuadriculaPeces } from './CuadriculaPeces';
 import { OPCIONES_PERFIL } from './perfiles';
 import { useSeleccion } from './seleccion';
@@ -13,24 +13,30 @@ export function Evaluacion() {
   const { perfil, rio, especieId, setPerfil, setRio, setEspecieId } = useSeleccion();
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-9">
       <Paso numero={1} titulo="¿Quién va a comer?">
-        {OPCIONES_PERFIL.map(({ perfil: valor, etiqueta, Icono }) => (
-          <Opcion key={valor} elegida={perfil === valor} onClick={() => setPerfil(valor)}>
-            <Icono width={40} height={40} className="shrink-0" />
-            {etiqueta}
-          </Opcion>
-        ))}
+        <div className="flex flex-col gap-3">
+          {OPCIONES_PERFIL.map(({ perfil: valor, etiqueta, Icono }) => (
+            <Opcion key={valor} elegida={perfil === valor} onClick={() => setPerfil(valor)}>
+              <IconoOpcion elegida={perfil === valor}>
+                <Icono width={30} height={30} strokeWidth={1.8} />
+              </IconoOpcion>
+              {etiqueta}
+            </Opcion>
+          ))}
+        </div>
       </Paso>
 
       {perfil && (
         <Paso numero={2} titulo="¿De qué río es el pez?">
-          {rios.map((valor) => (
-            <Opcion key={valor} elegida={rio === valor} onClick={() => setRio(valor)}>
-              <IconoRio width={36} height={36} className="shrink-0" />
-              Río {valor}
-            </Opcion>
-          ))}
+          <div className="flex flex-wrap gap-2">
+            {rios.map((valor) => (
+              <Chip key={valor} elegido={rio === valor} onClick={() => setRio(valor)}>
+                <IconoRio width={22} height={22} strokeWidth={1.8} className="shrink-0" />
+                Río {valor}
+              </Chip>
+            ))}
+          </div>
         </Paso>
       )}
 
@@ -46,7 +52,7 @@ export function Evaluacion() {
           />
           <BotonGrande variante="secundario" onClick={() => navegar('/camara')}>
             <span className="flex items-center justify-center gap-2">
-              <IconoCamara /> Tomar foto del pez
+              <IconoCamara strokeWidth={1.8} /> Tomar foto del pez
             </span>
           </BotonGrande>
         </Paso>

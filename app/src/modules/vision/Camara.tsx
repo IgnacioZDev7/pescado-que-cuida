@@ -8,7 +8,7 @@ import { cargarModelo, clasificar } from '../../ml/clasificador';
 import { BotonGrande } from '../../ui/BotonGrande';
 import { FotoPez } from '../../ui/FotoPez';
 import { IconoCamara, IconoRio } from '../../ui/Iconos';
-import { Opcion, Paso } from '../../ui/Paso';
+import { Chip, IconoOpcion, Opcion, Paso } from '../../ui/Paso';
 import { CuadriculaPeces } from '../semaforo/CuadriculaPeces';
 import { OPCIONES_PERFIL } from '../semaforo/perfiles';
 import { useSeleccion } from '../semaforo/seleccion';
@@ -40,7 +40,7 @@ function dibujarRecorte(canvas: HTMLCanvasElement, imagen: CanvasImageSource, fu
 
 /** Esquina destacada del recuadro guía. */
 function Esquina({ posicion }: { posicion: string }) {
-  return <span aria-hidden="true" className={`absolute h-10 w-10 border-white ${posicion}`} />;
+  return <span aria-hidden="true" className={`absolute h-9 w-9 border-white ${posicion}`} />;
 }
 
 /**
@@ -182,38 +182,48 @@ export function Camara() {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-2xl font-bold text-marino">Foto del pescado</h1>
+      <h1 className="text-3xl font-black tracking-tight text-marino">Foto del pescado</h1>
 
       {etapa.tipo === 'captura' && !sinCamara && (
-        <div className="flex flex-col gap-3">
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-black">
+        <div className="animar-entrada flex flex-col items-center gap-5">
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-tarjeta bg-black shadow-tarjeta">
             <video ref={videoRef} playsInline muted className="absolute inset-0 h-full w-full object-cover" />
             {/* Recuadro guía: lo que queda dentro es lo único que se analiza. */}
             <div
               aria-hidden="true"
-              className="absolute left-1/2 top-1/2 aspect-square w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-lg border-4 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+              className="absolute left-1/2 top-1/2 aspect-square w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-2xl border-2 border-dashed border-white/70 shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]"
             >
-              <Esquina posicion="-left-2 -top-2 rounded-tl-lg border-l-8 border-t-8" />
-              <Esquina posicion="-right-2 -top-2 rounded-tr-lg border-r-8 border-t-8" />
-              <Esquina posicion="-bottom-2 -left-2 rounded-bl-lg border-b-8 border-l-8" />
-              <Esquina posicion="-bottom-2 -right-2 rounded-br-lg border-b-8 border-r-8" />
+              <Esquina posicion="-left-1 -top-1 rounded-tl-2xl border-l-4 border-t-4" />
+              <Esquina posicion="-right-1 -top-1 rounded-tr-2xl border-r-4 border-t-4" />
+              <Esquina posicion="-bottom-1 -left-1 rounded-bl-2xl border-b-4 border-l-4" />
+              <Esquina posicion="-bottom-1 -right-1 rounded-br-2xl border-b-4 border-r-4" />
             </div>
-            <p className="absolute inset-x-3 bottom-3 rounded-lg bg-black/80 px-3 py-2 text-center text-xl font-bold text-white">
+            <p className="absolute inset-x-4 bottom-4 rounded-2xl bg-black/75 px-4 py-2.5 text-center text-lg font-bold text-white">
               Ponga el pez dentro del recuadro
             </p>
           </div>
-          <BotonGrande onClick={tomarFoto} disabled={!camaraLista || procesando}>
-            <span className="flex items-center justify-center gap-2">
-              <IconoCamara /> Tomar foto
+          {/* Disparador circular grande. */}
+          <button
+            type="button"
+            onClick={tomarFoto}
+            disabled={!camaraLista || procesando}
+            aria-label="Tomar foto"
+            className="tactil flex h-20 w-20 items-center justify-center rounded-full bg-white p-1.5 shadow-tarjeta ring-4 ring-marino disabled:opacity-50"
+          >
+            <span className="flex h-full w-full items-center justify-center rounded-full bg-marino text-white">
+              <IconoCamara width={30} height={30} strokeWidth={1.8} />
             </span>
-          </BotonGrande>
+          </button>
+          <p aria-hidden="true" className="-mt-2 text-base font-bold text-marino">
+            Tomar foto
+          </p>
         </div>
       )}
 
       {etapa.tipo === 'captura' && sinCamara && (
         <div className="flex flex-col gap-3">
-          <p className="text-lg">No se pudo abrir la cámara. Puede elegir una foto.</p>
-          <label className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-marino px-4 py-3 text-xl font-semibold text-white focus-within:outline focus-within:outline-4 focus-within:outline-marino/50">
+          <p className="text-lg text-tenue">No se pudo abrir la cámara. Puede elegir una foto.</p>
+          <label className="tactil flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-marino px-5 py-3 text-lg font-bold text-white shadow-suave focus-within:outline focus-within:outline-4 focus-within:outline-marino/50 active:bg-marino-oscuro">
             <IconoCamara /> Elegir foto
             <input
               type="file"
@@ -236,7 +246,7 @@ export function Camara() {
       {etapa.tipo === 'procesando' && (
         <div className="flex flex-col items-center gap-4">
           {fotoTomada && (
-            <img src={fotoTomada} alt="Su foto" className="aspect-square w-3/4 rounded-xl object-cover" />
+            <img src={fotoTomada} alt="Su foto" className="aspect-square w-3/4 rounded-tarjeta object-cover shadow-tarjeta" />
           )}
           <div role="status" aria-live="polite" className="flex items-center gap-3 text-xl font-semibold text-marino">
             <span
@@ -249,12 +259,12 @@ export function Camara() {
       )}
 
       {etapa.tipo === 'confirmar' && (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-bold text-marino">¿Es este pez?</h2>
+        <section className="animar-entrada flex flex-col gap-4">
+          <h2 className="text-2xl font-extrabold tracking-tight text-marino">¿Es este pez?</h2>
           {fotoTomada && (
             <figure className="flex flex-col items-center gap-1">
-              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-xl object-cover" />
-              <figcaption className="text-base font-semibold text-gray-800">Su foto</figcaption>
+              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-tarjeta object-cover shadow-tarjeta" />
+              <figcaption className="text-sm font-semibold text-tenue">Su foto</figcaption>
             </figure>
           )}
           <ul className="flex flex-col gap-3">
@@ -263,11 +273,11 @@ export function Camara() {
                 <button
                   type="button"
                   onClick={() => confirmarEspecie(especie)}
-                  className="flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-xl border-2 border-marino/40 bg-white text-left"
+                  className="tactil flex min-h-12 w-full items-center gap-3 overflow-hidden rounded-tarjeta bg-white text-left shadow-tarjeta"
                 >
                   <FotoPez key={especie.foto} foto={especie.foto} className="h-20 w-24 shrink-0" />
-                  <span className="flex-1 text-xl font-bold text-marino">{especie.nombreComun}</span>
-                  <span className="mr-3 text-lg font-semibold text-gray-800">
+                  <span className="flex-1 text-lg font-extrabold tracking-tight text-marino">{especie.nombreComun}</span>
+                  <span className="mr-4 text-base font-bold text-tenue">
                     {Math.round(prediccion.confianza * 100)} %
                   </span>
                 </button>
@@ -284,21 +294,23 @@ export function Camara() {
         <div className="flex flex-col gap-6">
           {fotoTomada && (
             <figure className="flex flex-col items-center gap-1">
-              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-xl object-cover" />
-              <figcaption className="text-base font-semibold text-gray-800">Su foto</figcaption>
+              <img src={fotoTomada} alt="Su foto" className="aspect-square w-1/2 rounded-tarjeta object-cover shadow-tarjeta" />
+              <figcaption className="text-sm font-semibold text-tenue">Su foto</figcaption>
             </figure>
           )}
-          <p className="rounded-xl border-2 border-marino bg-marino/10 p-3 text-xl font-semibold text-marino">
+          <p className="rounded-tarjeta bg-marino/10 px-5 py-4 text-lg font-bold text-marino">
             Elija el pez de la lista
           </p>
           {!rio && (
             <Paso numero={1} titulo="¿De qué río es el pez?">
-              {rios.map((valor) => (
-                <Opcion key={valor} elegida={false} onClick={() => setRio(valor)}>
-                  <IconoRio width={36} height={36} className="shrink-0" />
-                  Río {valor}
-                </Opcion>
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {rios.map((valor) => (
+                  <Chip key={valor} elegido={false} onClick={() => setRio(valor)}>
+                    <IconoRio width={22} height={22} strokeWidth={1.8} className="shrink-0" />
+                    Río {valor}
+                  </Chip>
+                ))}
+              </div>
             </Paso>
           )}
           {rio && <CuadriculaPeces especies={especiesDelRio(rio)} onElegir={confirmarEspecie} />}
@@ -316,7 +328,9 @@ export function Camara() {
                 navegar('/resultado');
               }}
             >
-              <Icono width={40} height={40} className="shrink-0" />
+              <IconoOpcion elegida={false}>
+                <Icono width={30} height={30} strokeWidth={1.8} />
+              </IconoOpcion>
               {etiqueta}
             </Opcion>
           ))}

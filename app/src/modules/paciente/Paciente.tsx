@@ -61,8 +61,8 @@ function Pictograma({
       type="button"
       aria-pressed={elegido}
       onClick={onClick}
-      className={`relative flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-xl border-2 p-2 text-lg font-bold ${
-        elegido ? 'border-marino bg-marino text-white' : 'border-marino/40 bg-white text-marino'
+      className={`tactil relative flex min-h-24 w-full flex-col items-center justify-center gap-1 rounded-tarjeta border-2 p-2 text-lg font-bold shadow-tarjeta ${
+        elegido ? 'border-marino bg-marino text-white' : 'border-transparent bg-white text-marino'
       }`}
     >
       {elegido && <IconoCheck className="absolute right-1 top-1" width={22} height={22} strokeWidth={3} />}
@@ -76,8 +76,8 @@ function Pictograma({
 
 function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-xl font-bold text-marino">{titulo}</h2>
+    <section className="animar-entrada flex flex-col gap-3">
+      <h2 className="text-2xl font-extrabold tracking-tight text-marino">{titulo}</h2>
       {children}
     </section>
   );
@@ -106,7 +106,7 @@ export function Paciente() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="sticky top-14 z-[5] flex flex-col gap-2 rounded-xl border-2 border-marino bg-white p-3">
+      <div className="tarjeta sticky top-[70px] z-[5] flex flex-col gap-3 p-4">
         <p aria-live="polite" className="text-xl font-bold text-marino">
           {partes.length > 0 ? partes.join(' · ') : 'Sin respuestas todavía'}
         </p>

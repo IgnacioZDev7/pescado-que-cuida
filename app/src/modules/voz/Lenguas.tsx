@@ -35,29 +35,29 @@ function TarjetaFrase({
 }) {
   const sinAudio = !frase.archivoAudio || estado === 'pendiente';
   return (
-    <li className="flex flex-col gap-3 rounded-xl border-2 border-marino/30 bg-white p-4">
+    <li className="tarjeta animar-entrada flex flex-col gap-4 p-5">
       <div className="flex items-start gap-3">
         {frase.pictograma && <Pictograma ruta={frase.pictograma} />}
         <div className="flex flex-col gap-1">
-          <p className="text-xl font-bold text-gray-950">{frase.es}</p>
+          <p className="text-xl font-extrabold tracking-tight text-tinta">{frase.es}</p>
           {frase.textoLengua && (
             <p lang="ese" className="text-2xl font-bold text-marino">
               {frase.textoLengua}
             </p>
           )}
-          <p className="text-base text-gray-800">
+          <p className="text-base font-medium text-tenue">
             {frase.lengua ? (NOMBRE_LENGUA[frase.lengua] ?? frase.lengua) : 'Pendiente de grabación'}
           </p>
           {frase.textoLengua && frase.fuenteTraduccion && (
-            <p className="text-sm text-gray-700">Fuente: {frase.fuenteTraduccion}</p>
+            <p className="text-sm text-tenue">Fuente: {frase.fuenteTraduccion}</p>
           )}
           {frase.textoLengua && !frase.validadoPor && (
-            <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2 py-0.5 text-sm font-semibold text-gray-950">
+            <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2.5 py-0.5 text-sm font-semibold text-ambar-tinta">
               Texto por validar con hablante nativo
             </span>
           )}
           {!frase.validadoPor && (
-            <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2 py-0.5 text-sm font-semibold text-gray-950">
+            <span className="w-fit rounded-full border border-ambar bg-ambar/15 px-2.5 py-0.5 text-sm font-semibold text-ambar-tinta">
               Audio de prueba
             </span>
           )}
@@ -67,7 +67,7 @@ function TarjetaFrase({
         type="button"
         onClick={onEscuchar}
         disabled={sinAudio}
-        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-marino px-4 py-3 text-xl font-semibold text-white disabled:border-2 disabled:border-gray-400 disabled:bg-gray-100 disabled:text-gray-700"
+        className="tactil flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-marino px-5 py-3 text-lg font-bold text-white shadow-suave active:bg-marino-oscuro disabled:border-2 disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-700 disabled:shadow-none"
       >
         <IconoSonido />
         {sinAudio ? 'Audio pendiente' : estado === 'sonando' ? 'Escuchando…' : 'Escuchar'}
@@ -102,9 +102,9 @@ export function Lenguas() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold text-marino">Frases en lenguas</h1>
+      <h1 className="text-3xl font-black tracking-tight text-marino">Frases en lenguas</h1>
       {frases.length === 0 ? (
-        <p className="text-lg">Sin datos</p>
+        <p className="text-lg text-tenue">Sin datos</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {frases.map((frase) => (
