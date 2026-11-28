@@ -1,0 +1,11 @@
+Fotos de especies: recortes a 512x512 de imágenes del dataset de entrenamiento
+recopilado por Danner. Origen y licencia de cada foto por confirmar (el nombre
+de archivo parece un id de observación; verificar autor y licencia antes de
+cualquier uso público).
+
+sabalo.webp      <- Prochilodus_nigricans_260101775_1.jpg
+pacu.webp        <- Piaractus_brachypomus_182905841_1.jpg
+pez-ciego.webp   <- Cetopsis_coecutiens_393328296_1.jpg
+bagre.webp       <- Brachyplatystoma_rousseauxii_118609581_1.jpg
+blanquillo.webp  <- Calophysus_macropterus_388911342_1.jpg
+paiche.webp      <- Arapaima_gigas_68921840_1.jpg
